@@ -11,6 +11,11 @@ if 'page_num' not in st.session_state:
 if 'input_data' not in st.session_state:
     st.session_state.input_data = pd.DataFrame(columns=['Year', 'Month','Day','カテゴリ', '金額','累計','メモ'])
 
+#ページ毎に異なるデータを保持するためのsession_stateを初期化
+if 'input_data2' not in st.session_state:
+    st.session_state.input_data2 = pd.DataFrame(columns=['Month','Day','カテゴリ', '金額','累計','メモ'])
+
+
 # ページ毎に異なるデータを保持するためのsession_stateを初期化
 if 'graph_data' not in st.session_state:
     st.session_state.graph_data = pd.DataFrame(columns=['Day','累計'])
@@ -108,19 +113,32 @@ elif page == '月々収支':
 
     specified_column2 = 'Year'
     selected_value2=st.selectbox(f'Select a value for {specified_column2}:', st.session_state.input_data[specified_column2].unique())
-    specified_data2 = int(selected_value2)
+    specified_data2 = selected_value2
     filtered_data2 = st.session_state.input_data[st.session_state.input_data[specified_column2] == specified_data2]
+    # st.session_state.input_data2 = st.session_state.input_data[st.session_state.input_data[specified_column2] == specified_data2]
+    # st.write('filtered_data2')
+    # st.write(filtered_data2)
+    # st.write(st.session_state.input_data2)
 
     specified_column3 = 'Month'
     selected_value3=st.selectbox(f'Select a value for {specified_column3}:', options_list)
     specified_data3 = int(selected_value3)
-    filtered_data3 = filtered_data2[st.session_state.input_data[specified_column3] == specified_data3]
+    filtered_data3 = filtered_data2[filtered_data2[specified_column3] == specified_data3]
+    # filtered_data3 = st.session_state.input_data2[st.session_state.input_data2[specified_column3] == specified_data3]
+    # st.write('filtered_data3')
+    # st.write(filtered_data3)
 
     # st.write()
     filtered_data3['累計']= filtered_data3['金額'].cumsum()
+    # st.write('filtered_data3[累計]')
+    # st.write(filtered_data3['累計'])
+
     st.session_state.graph_data = filtered_data3[['Day', '累計']]
+    st.session_state.graph_data = st.session_state.graph_data.reset_index(drop=True)
+    # st.write('st.session_state.graph_data')
+    # st.write(st.session_state.graph_data)
     # st.line_chart(st.session_state.input_data('Day')['累計'])
-    st.bar_chart(st.session_state.graph_data.set_index('Day'),x="日[DAY]",y="月累計収支[¥]",use_container_width=True)
+    st.bar_chart(st.session_state.graph_data.set_index('Day'),use_container_width=True)
     # matplotlibで棒グラフを描画
     # fig, ax = plt.subplots()
     # ax.bar(st.session_state.input_data['Day'], st.session_state.input_data['累計'])
@@ -142,7 +160,7 @@ else:
 
     # 各カテゴリごとに合計を計算
     result_df = st.session_state.input_data.groupby('Year')['金額'].sum().reset_index()
-    st.bar_chart(result_df.set_index('Year'),x="年[YEAR]",y="年間収支[¥]",use_container_width=True)
+    st.bar_chart(result_df.set_index('Year'),use_container_width=True)
 
 
 # # 月ごとの支出の可視化
